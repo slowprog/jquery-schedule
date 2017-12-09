@@ -316,6 +316,9 @@
                     if(bdata["data"]){
                         data["data"] = bdata["data"];
                     }
+                    if(bdata["class"]){
+                        data["class"] = bdata["class"];
+                    }
                     element.addScheduleData(data);
                 }
             }
