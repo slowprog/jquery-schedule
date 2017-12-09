@@ -22,5 +22,9 @@
     "**/.*",
     "node_modules",
     "bower_components"
-  ]
+  ],
+	"dependencies": {
+		"jquery": ">= 1.7.2",
+		"jquery-ui": ">= 1.12.1"
+	}
 }
