@@ -15,6 +15,8 @@
             headTimeBorder:1,	// time border width
             dataWidth:160,		// data width
             verticalScrollbar:0,	// vertical scrollbar width
+            draggable:true,		// Schedule is draggable
+            resizable:true,		// Schedule is resizable
             // event
             init_data: null,
             change: null,
@@ -142,109 +144,113 @@
 
             var $node = $element.find(".sc_Bar");
             // move node.
-            $node.draggable({
-                grid: [ setting.widthTimeX, 1 ],
-                containment: ".sc_main",
-                helper : 'original',
-                start: function(event, ui) {
-                    var node = {};
-                    node["node"] = this;
-                    node["offsetTop"] = ui.position.top;
-                    node["offsetLeft"] = ui.position.left;
-                    node["currentTop"] = ui.position.top;
-                    node["currentLeft"] = ui.position.left;
-                    node["timeline"] = element.getTimeLineNumber(ui.position.top);
-                    node["nowTimeline"] = node["timeline"];
-                    currentNode = node;
-                },
-                drag: function(event, ui) {
-                    jQuery(this).data("dragCheck",true);
-                    if(!currentNode){
-                        return false;
+            if (setting.draggable) {
+                $node.draggable({
+                    grid: [ setting.widthTimeX, 1 ],
+                    containment: ".sc_main",
+                    helper : 'original',
+                    start: function(event, ui) {
+                        var node = {};
+                        node["node"] = this;
+                        node["offsetTop"] = ui.position.top;
+                        node["offsetLeft"] = ui.position.left;
+                        node["currentTop"] = ui.position.top;
+                        node["currentLeft"] = ui.position.left;
+                        node["timeline"] = element.getTimeLineNumber(ui.position.top);
+                        node["nowTimeline"] = node["timeline"];
+                        currentNode = node;
+                    },
+                    drag: function(event, ui) {
+                        jQuery(this).data("dragCheck",true);
+                        if(!currentNode){
+                            return false;
+                        }
+                        var $moveNode = jQuery(this);
+                        var sc_key = $moveNode.data("sc_key");
+                        var originalTop = ui.originalPosition.top;
+                        var originalLeft = ui.originalPosition.left;
+                        var positionTop = ui.position.top;
+                        var positionLeft = ui.position.left;
+                        var timelineNum = element.getTimeLineNumber(ui.position.top);
+                        // 位置の修正
+                        //ui.position.top = Math.floor(ui.position.top / setting.timeLineY) * setting.timeLineY;
+                        //ui.position.top = element.getScheduleCount(timelineNum) * setting.timeLineY;
+                        ui.position.left = Math.floor(ui.position.left / setting.widthTimeX) * setting.widthTimeX;
+
+
+                        //$moveNode.find(".text").text(timelineNum+" "+(element.getScheduleCount(timelineNum) + 1));
+                        if(currentNode["nowTimeline"] != timelineNum){
+                            // 高さの調節
+                            //element.resizeRow(currentNode["nowTimeline"],element.getScheduleCount(currentNode["nowTimeline"]));
+                            //element.resizeRow(timelineNum,element.getScheduleCount(timelineNum) + 1);
+                            // 現在のタイムライン
+                            currentNode["nowTimeline"] = timelineNum;
+                        }else{
+                            //ui.position.top = currentNode["currentTop"];
+                        }
+                        currentNode["currentTop"] = ui.position.top;
+                        currentNode["currentLeft"] = ui.position.left;
+                        // テキスト変更
+                        element.rewriteBarText($moveNode,scheduleData[sc_key]);
+                        return true;
+                    },
+                    // 要素の移動が終った後の処理
+                    stop: function(event, ui) {
+                        jQuery(this).data("dragCheck",false);
+                        currentNode = null;
+
+                        var node = jQuery(this);
+                        var sc_key = node.data("sc_key");
+                        var x = node.position().left;
+                        var w = node.width();
+                        var start = tableStartTime + (Math.floor(x / setting.widthTimeX) * setting.widthTime);
+                        //var end = tableStartTime + (Math.floor((x + w) / setting.widthTimeX) * setting.widthTime);
+                        var end = start + ((scheduleData[sc_key]["end"] - scheduleData[sc_key]["start"]));
+
+                        scheduleData[sc_key]["start"] = start;
+                        scheduleData[sc_key]["end"] = end;
+                        // コールバックがセットされていたら呼出
+                        if(setting.change){
+                            setting.change(node, scheduleData[sc_key]);
+                        }
                     }
-                    var $moveNode = jQuery(this);
-                    var sc_key = $moveNode.data("sc_key");
-                    var originalTop = ui.originalPosition.top;
-                    var originalLeft = ui.originalPosition.left;
-                    var positionTop = ui.position.top;
-                    var positionLeft = ui.position.left;
-                    var timelineNum = element.getTimeLineNumber(ui.position.top);
-                    // 位置の修正
-                    //ui.position.top = Math.floor(ui.position.top / setting.timeLineY) * setting.timeLineY;
-                    //ui.position.top = element.getScheduleCount(timelineNum) * setting.timeLineY;
-                    ui.position.left = Math.floor(ui.position.left / setting.widthTimeX) * setting.widthTimeX;
+                });
+            }
+            if (setting.resizable) {
+                $node.resizable({
+                    handles:'e',
+                    grid: [ setting.widthTimeX, setting.timeLineY ],
+                    minWidth:setting.widthTimeX,
+                    start: function(event, ui){
+                        var node = jQuery(this);
+                        node.data("resizeCheck",true);
+                    },
+                    // 要素の移動が終った後の処理
+                    stop: function(event, ui){
+                        var node = jQuery(this);
+                        var sc_key = node.data("sc_key");
+                        var x = node.position().left;
+                        var w = node.width();
+                        var start = tableStartTime + (Math.floor(x / setting.widthTimeX) * setting.widthTime);
+                        var end = tableStartTime + (Math.floor((x + w) / setting.widthTimeX) * setting.widthTime);
+                        var timelineNum = scheduleData[sc_key]["timeline"];
 
+                        scheduleData[sc_key]["start"] = start;
+                        scheduleData[sc_key]["end"] = end;
 
-                    //$moveNode.find(".text").text(timelineNum+" "+(element.getScheduleCount(timelineNum) + 1));
-                    if(currentNode["nowTimeline"] != timelineNum){
-                        // 高さの調節
-                        //element.resizeRow(currentNode["nowTimeline"],element.getScheduleCount(currentNode["nowTimeline"]));
-                        //element.resizeRow(timelineNum,element.getScheduleCount(timelineNum) + 1);
-                        // 現在のタイムライン
-                        currentNode["nowTimeline"] = timelineNum;
-                    }else{
-                        //ui.position.top = currentNode["currentTop"];
+                        // 高さ調整
+                        element.resetBarPosition(timelineNum);
+                        // テキスト変更
+                        element.rewriteBarText(node,scheduleData[sc_key]);
+
+                        node.data("resizeCheck",false);
+                        // コールバックがセットされていたら呼出
+                        if(setting.change){
+                            setting.change(node, scheduleData[sc_key]);
+                        }
                     }
-                    currentNode["currentTop"] = ui.position.top;
-                    currentNode["currentLeft"] = ui.position.left;
-                    // テキスト変更
-                    element.rewriteBarText($moveNode,scheduleData[sc_key]);
-                    return true;
-                },
-                // 要素の移動が終った後の処理
-                stop: function(event, ui) {
-                    jQuery(this).data("dragCheck",false);
-                    currentNode = null;
-
-                    var node = jQuery(this);
-                    var sc_key = node.data("sc_key");
-                    var x = node.position().left;
-                    var w = node.width();
-                    var start = tableStartTime + (Math.floor(x / setting.widthTimeX) * setting.widthTime);
-                    //var end = tableStartTime + (Math.floor((x + w) / setting.widthTimeX) * setting.widthTime);
-                    var end = start + ((scheduleData[sc_key]["end"] - scheduleData[sc_key]["start"]));
-
-                    scheduleData[sc_key]["start"] = start;
-                    scheduleData[sc_key]["end"] = end;
-                    // コールバックがセットされていたら呼出
-                    if(setting.change){
-                        setting.change(node, scheduleData[sc_key]);
-                    }
-                }
-            });
-            $node.resizable({
-                handles:'e',
-                grid: [ setting.widthTimeX, setting.timeLineY ],
-                minWidth:setting.widthTimeX,
-                start: function(event, ui){
-                    var node = jQuery(this);
-                    node.data("resizeCheck",true);
-                },
-                // 要素の移動が終った後の処理
-                stop: function(event, ui){
-                    var node = jQuery(this);
-                    var sc_key = node.data("sc_key");
-                    var x = node.position().left;
-                    var w = node.width();
-                    var start = tableStartTime + (Math.floor(x / setting.widthTimeX) * setting.widthTime);
-                    var end = tableStartTime + (Math.floor((x + w) / setting.widthTimeX) * setting.widthTime);
-                    var timelineNum = scheduleData[sc_key]["timeline"];
-
-                    scheduleData[sc_key]["start"] = start;
-                    scheduleData[sc_key]["end"] = end;
-
-                    // 高さ調整
-                    element.resetBarPosition(timelineNum);
-                    // テキスト変更
-                    element.rewriteBarText(node,scheduleData[sc_key]);
-
-                    node.data("resizeCheck",false);
-                    // コールバックがセットされていたら呼出
-                    if(setting.change){
-                        setting.change(node, scheduleData[sc_key]);
-                    }
-                }
-            });
+                });
+            }
             return key;
         };
         // スケジュール数の取得
@@ -324,21 +330,23 @@
             }
             // 高さの調整
             element.resetBarPosition(id);
-            $element.find('.sc_main .timeline').eq(id).droppable({
-                accept: ".sc_Bar",
-                drop: function(ev, ui) {
-                    var node = ui.draggable;
-                    var sc_key = node.data("sc_key");
-                    var nowTimelineNum = scheduleData[sc_key]["timeline"];
-                    var timelineNum = $element.find('.sc_main .timeline').index(this);
-                    // タイムラインの変更
-                    scheduleData[sc_key]["timeline"] = timelineNum;
-                    node.appendTo(this);
-                    // 高さ調整
-                    element.resetBarPosition(nowTimelineNum);
-                    element.resetBarPosition(timelineNum);
-                }
-            });
+            if (setting.draggable) {
+                $element.find('.sc_main .timeline').eq(id).droppable({
+                    accept: ".sc_Bar",
+                    drop: function(ev, ui) {
+                        var node = ui.draggable;
+                        var sc_key = node.data("sc_key");
+                        var nowTimelineNum = scheduleData[sc_key]["timeline"];
+                        var timelineNum = $element.find('.sc_main .timeline').index(this);
+                        // タイムラインの変更
+                        scheduleData[sc_key]["timeline"] = timelineNum;
+                        node.appendTo(this);
+                        // 高さ調整
+                        element.resetBarPosition(nowTimelineNum);
+                        element.resetBarPosition(timelineNum);
+                    }
+                });
+            }
             // コールバックがセットされていたら呼出
             if(setting.append){
                 $element.find('.sc_main .timeline').eq(id).find(".sc_Bar").each(function(){
