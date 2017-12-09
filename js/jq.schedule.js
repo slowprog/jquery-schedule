@@ -23,7 +23,9 @@
             click: null,
             append: null,
             time_click: null,
-            debug:""			// debug selecter
+            debug:"",			// debug selecter
+            // rendering
+            css_border_box: false // Specify `true` if CSS box-sizing property is `content-box`. Need `true` if construct with bootstrap.
         };
         this.calcStringTime = function(string) {
             var slice = string.split(':');
@@ -284,7 +286,10 @@
             var $timeline = jQuery(html);
             for(var t=tableStartTime;t<tableEndTime;t+=setting.widthTime){
                 var $tl = jQuery('<div class="tl"></div>');
-                $tl.width(setting.widthTimeX - setting.timeBorder);
+                var w = setting.css_border_box
+                    ? setting.widthTimeX
+                    : setting.widthTimeX - setting.timeBorder ;
+                $tl.width(w);
 
                 $tl.data("time",element.formatTime(t));
                 $tl.data("timeline",timeline);
@@ -509,7 +514,10 @@
                     html += '<div class="sc_time">'+element.formatTime(t)+'</div>';
                     var $time = jQuery(html);
                     var cell_num = Math.floor(Number(Math.min((Math.ceil((t + setting.widthTime) / 3600) * 3600),tableEndTime) - t) / setting.widthTime);
-                    $time.width((cell_num * setting.widthTimeX) - setting.headTimeBorder);
+                    var w = setting.css_border_box
+                        ? (cell_num * setting.widthTimeX)
+                        : (cell_num * setting.widthTimeX) - setting.headTimeBorder ;
+                    $time.width(w);
                     $element.find(".sc_header_scroll").append($time);
 
                     before_time = t;

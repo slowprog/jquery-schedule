@@ -42,7 +42,7 @@
 	color:#FFFFFF;
 	padding:4px 0;
 	line-height:18px;
-	height:18px;
+	/* height:18px; */
 	display:block;
 }
 #schedule .sc_header .sc_time,
@@ -83,17 +83,26 @@
 }
 #schedule .sc_Bar .head{
 	display:block;
-	padding:6px 8px 0;
+	/* padding:6px 8px 0; */
 	font-size:12px;
 	height:16px;
 	overflow:hidden;
 }
 #schedule .sc_Bar .text{
 	display:block;
-	padding:5px 15px 0;
+	padding:0px 15px 0;
 	font-weight:bold;
 	height:18px;
 	overflow:hidden;
+}
+#schedule .timeline:before{
+	/* Force reset setting. */
+    width: 0px;
+}
+#schedule .timeline{
+	/* Force reset setting. */
+    margin: 0px;
+    padding: 0px;
 }
 #schedule .timeline,
 #schedule .sc_main .tb{
