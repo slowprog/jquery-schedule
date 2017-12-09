@@ -96,7 +96,7 @@
                 height : $element.find('.sc_main .timeline').eq(data["timeline"]).height()
             });
             if(data["text"]){
-                $bar.find(".text").text(data["text"]);
+                $bar.find(".text").html(data["text"]);
             }
             if(data["class"]){
                 $bar.addClass(data["class"]);
@@ -120,7 +120,7 @@
             });
             $bar.find(".time").text(stext+"-"+etext);
             if(data["text"]){
-                $bar.find(".text").text(data["text"]);
+                $bar.find(".text").html(data["text"]);
             }
             if(data["class"]){
                 $bar.addClass(data["class"]);
