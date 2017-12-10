@@ -15,8 +15,8 @@
             headTimeBorder:1,	// time border width
             dataWidth:160,		// data width
             verticalScrollbar:0,	// vertical scrollbar width
-            draggable:true,		// Schedule is draggable
-            resizable:true,		// Schedule is resizable
+            draggable:true,		// Schedule is draggable (Require jQuery UI if true)
+            resizable:true,		// Schedule is resizable (Require jQuery UI if true)
             // event
             init_data: null,
             change: null,
