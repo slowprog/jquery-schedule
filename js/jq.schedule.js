@@ -486,7 +486,7 @@
             html += '<div class="sc_data_scroll">'+"\n";
             html += '</div>'+"\n";
             html += '</div>'+"\n";
-            html += '<div class="sc_main_box">'+"\n";
+            html += '<div class="sc_main_box horizontal dragscroll">'+"\n";
             html += '<div class="sc_main_scroll">'+"\n";
             html += '<div class="sc_main">'+"\n";
             html += '</div>'+"\n";
