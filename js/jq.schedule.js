@@ -18,11 +18,11 @@
             draggable:true,		// Schedule is draggable (Require jQuery UI if true)
             resizable:true,		// Schedule is resizable (Require jQuery UI if true)
             // event
-            init_data: null,
+            init_data: null,    // Trigger when initialize titile column.
             change: null,
-            click: null,
-            append: null,
-            time_click: null,
+            click: null,        // Trigger when click schedules.
+            append: null,       // Trigger when append schedules.
+            time_click: null,   // Trigger when click time.
             debug:"",			// debug selecter
             // rendering
             css_border_box: false // Specify `true` if CSS box-sizing property is `content-box`. Need `true` if construct with bootstrap.
@@ -137,9 +137,13 @@
                 // コールバックがセットされていたら呼出
                 if(setting.click){
                     if(jQuery(this).data("dragCheck") !== true && jQuery(this).data("resizeCheck") !== true){
-                        var node = jQuery(this);
-                        var sc_key = node.data("sc_key");
-                        setting.click(node, scheduleData[sc_key]);
+                        if ($(this).closest('.dragscroll').hasClass('dragging')) {
+                            event.preventDefault();
+                        } else {
+                            var node = jQuery(this);
+                            var sc_key = node.data("sc_key");
+                            setting.click(node, scheduleData[sc_key]);
+                        }
                     }
                 }
             });
