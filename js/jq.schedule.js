@@ -14,6 +14,7 @@
             timeLinePaddingBottom:0,
             headTimeBorder:1,	// time border width
             dataWidth:160,		// data width
+            entireHeight:"470px",   // entire max height
             verticalScrollbar:0,	// vertical scrollbar width
             draggable:true,		// Schedule is draggable (Require jQuery UI if true)
             resizable:true,		// Schedule is resizable (Require jQuery UI if true)
@@ -138,7 +139,7 @@
                 if(setting.click){
                     if(jQuery(this).data("dragCheck") !== true && jQuery(this).data("resizeCheck") !== true){
                         if ($(this).closest('.dragscroll').hasClass('dragging')) {
-                            event.preventDefault();
+                            // event.preventDefault();
                         } else {
                             var node = jQuery(this);
                             var sc_key = node.data("sc_key");
@@ -504,8 +505,10 @@
             $element.find(".sc_main_box").scroll(function(){
                 $element.find(".sc_data_scroll").css("top", $(this).scrollTop() * -1);
                 $element.find(".sc_header_scroll").css("left", $(this).scrollLeft() * -1);
-
             });
+            $element.find(".sc_data").css("max-height", setting.entireHeight);
+            $element.find(".sc_main_box").css("max-height", setting.entireHeight);
+
             // add time cell
             var cell_num = Math.floor((tableEndTime - tableStartTime) / setting.widthTime);
             var before_time = -1;
