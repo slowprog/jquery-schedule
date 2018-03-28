@@ -108,7 +108,7 @@
         // スケジュール追加
         this.addScheduleData = function(data){
             var st = Math.ceil((data["start"] - tableStartTime) / setting.widthTime);
-            var et = Math.floor((data["end"] - tableStartTime) / setting.widthTime);
+            var et = Math.ceil((data["end"] - tableStartTime) / setting.widthTime);
             var $bar = jQuery('<div class="sc_Bar"><span class="head"><span class="time"></span></span><span class="text"></span></div>');
             var stext = element.formatTime(data["start"]);
             var etext = element.formatTime(data["end"]);
