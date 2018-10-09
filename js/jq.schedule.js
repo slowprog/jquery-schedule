@@ -28,6 +28,7 @@
             // rendering
             css_border_box: false // Specify `true` if CSS box-sizing property is `content-box`. Need `true` if construct with bootstrap.
         };
+
         this.calcStringTime = function(string) {
             var slice = string.split(':');
             var h = Number(slice[0]) * 60 * 60;
@@ -54,9 +55,6 @@
         tableStartTime -= (tableStartTime % setting.widthTime);
         tableEndTime -= (tableEndTime % setting.widthTime);
 
-        this.getScheduleData = function(){
-            return scheduleData;
-        }
         this.getTimelineData = function(){
             return timelineData;
         }
@@ -82,7 +80,7 @@
             }
             return num;
         }
-        // 背景データ追加
+        // Добавление фоновых данных
         this.addScheduleBgData = function(data){
             var st = Math.ceil((data["start"] - tableStartTime) / setting.widthTime);
             var et = Math.floor((data["end"] - tableStartTime) / setting.widthTime);
@@ -105,17 +103,26 @@
             //$element.find('.sc_main').append($bar);
             $element.find('.sc_main .timeline').eq(data["timeline"]).append($bar);
         }
-        // スケジュール追加
-        this.addScheduleData = function(data){
+        // Добавляет событие по времени в календарь.
+        this.addScheduleData = function (data) {
+            let overlappingTime = this.getOverlappingTime(data["timeline"], data["start"], data["end"]);
+
+            if (overlappingTime) {
+                data["start"] += overlappingTime;
+                data["end"] += overlappingTime;
+            }
+
             var st = Math.ceil((data["start"] - tableStartTime) / setting.widthTime);
             var et = Math.ceil((data["end"] - tableStartTime) / setting.widthTime);
             var $bar = jQuery('<div class="sc_Bar"><span class="head"><span class="time"></span></span><span class="text"></span></div>');
             var stext = element.formatTime(data["start"]);
             var etext = element.formatTime(data["end"]);
             var snum = element.getScheduleCount(data["timeline"]);
+
             $bar.css({
                 left : (st * setting.widthTimeX),
-                top : ((snum * setting.timeLineY) + setting.timeLinePaddingTop),
+                // top : ((snum * setting.timeLineY) + setting.timeLinePaddingTop),
+                top : 0,
                 width : ((et - st) * setting.widthTimeX),
                 height : (setting.timeLineY)
             });
@@ -126,13 +133,18 @@
             if(data["class"]){
                 $bar.addClass(data["class"]);
             }
-            //$element.find('.sc_main').append($bar);
-            $element.find('.sc_main .timeline').eq(data["timeline"]).append($bar);
+            if(data["disabled"]){
+                $bar.addClass('disabled_bar');
+            }
             // データの追加
             scheduleData.push(data);
             // key
             var key = scheduleData.length - 1;
-            $bar.data("sc_key",key);
+            $bar.data("sc_key", key);
+            $bar.attr("sc_key", key);
+            
+            //$element.find('.sc_main').append($bar);
+            $element.find('.sc_main .timeline').eq(data["timeline"]).append($bar);
 
             $bar.bind("mouseup",function(){
                 // コールバックがセットされていたら呼出
@@ -260,15 +272,32 @@
             }
             return key;
         };
-        // スケジュール数の取得
-        this.getScheduleCount = function(n){
+        // Получить кол-во событий в линии
+        this.getScheduleCount = function (n) {
             var num = 0;
-            for(var i in scheduleData){
-                if(scheduleData[i]["timeline"] == n){
+            for (var i in scheduleData) {
+                if (scheduleData[i]["timeline"] == n) {
                     num ++;
                 }
             }
             return num;
+        };
+        // Возвращает кол-во времени в секудах, которое накладывается на ближайшее событие, если есть
+        this.getOverlappingTime = function (timeline, start, end) {
+            for (var i in scheduleData) {
+                if (scheduleData[i]["timeline"] == timeline ){
+                    // Если пересечение спереди
+                    if (scheduleData[i]["start"] < end && scheduleData[i]["start"] > start) {
+                        return -(end - scheduleData[i]["start"]);
+                    }
+                    // Если пересечение сзади
+                    if (scheduleData[i]["end"] > start && scheduleData[i]["end"] < end) {
+                        return scheduleData[i]["end"] - start;
+                    }
+                }
+            }
+
+            return null;
         };
         // add
         this.addRow = function(timeline,row){
@@ -302,8 +331,15 @@
             }
             // クリックイベント
             if(setting.time_click){
-                $timeline.find(".tl").click(function(){
-                    setting.time_click(this,jQuery(this).data("time"),jQuery(this).data("timeline"),timelineData[jQuery(this).data("timeline")]);
+                $timeline.find(".tl").click(function () {
+                    // currentEvent
+
+                    setting.time_click(
+                        this,
+                        jQuery(this).data("time"),
+                        jQuery(this).data("timeline"),
+                        timelineData[jQuery(this).data("timeline")]
+                    );
                 });
             }
             $element.find('.sc_main').append($timeline);
@@ -334,6 +370,9 @@
                     }
                     if(bdata["class"]){
                         data["class"] = bdata["class"];
+                    }
+                    if(bdata["disabled"]){
+                        data["disabled"] = bdata["disabled"];
                     }
                     element.addScheduleData(data);
                 }
@@ -388,6 +427,12 @@
 
             return data;
         };
+        // Удаляет определённое событие по ключю
+        this.removeBar = function (sc_key) {
+            scheduleData.splice(sc_key, 1);
+
+            $element.find('.sc_Bar[sc_key="' + sc_key + '"]').remove();
+        }
         // テキストの変更
         this.rewriteBarText = function(node,data){
             var x = node.position().left;

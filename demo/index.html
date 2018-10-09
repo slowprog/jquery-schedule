@@ -5,9 +5,9 @@
 <title>jq.Schedule Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript" language="javascript"></script>
-<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js" type="text/javascript" language="javascript"></script>
-<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-2.1.3.min.js" type="text/javascript" language="javascript"></script>
+<!-- <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js" type="text/javascript" language="javascript"></script> -->
+<!-- <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" /> -->
 
 <script type="text/javascript" src="../js/jq.schedule.js"></script>
 <link rel="stylesheet" type="text/css" href="../css/style.css" />
@@ -21,29 +21,34 @@
 </style>
 <script type="text/javascript">
 jQuery(document).ready(function(){
+    var currentEvent = null;
     var $sc = jQuery("#schedule").timeSchedule({
         startTime: "07:00", // schedule start time(HH:ii)
         endTime: "21:00",   // schedule end time(HH:ii)
-        widthTime:60 * 10,  // cell timestamp example 10 minutes
+        widthTime:60 * 30,  // cell timestamp example 10 minutes
         timeLineY:60,       // height(px)
         verticalScrollbar:20,   // scrollbar (px)
         timeLineBorder:2,   // border(top and bottom)
         debug:"#debug",     // debug string output elements
+        draggable:false,	// Schedule is draggable (Require jQuery UI if true)
+        resizable:false,	// Schedule is resizable (Require jQuery UI if true)
         rows : {
             '1' : {
                 title : 'Title Area',
                 schedule:[
                     {
-                        start:'09:00',
-                        end:'12:00',
-                        text:'Text Area',
-                        data:{
-                        }
+                        start:'08:30',
+                        end:'10:00',
+                        // text:'Text Area1',
+                        disabled: true,
+                        // data:{
+                        // }
                     },
                     {
                         start:'11:00',
                         end:'14:00',
-                        text:'Text Area',
+                        text:'Text Area2',
+                        // disabled: true,
                         data:{
                         }
                     }
@@ -55,7 +60,8 @@ jQuery(document).ready(function(){
                     {
                         start:'16:00',
                         end:'17:00',
-                        text:'Text Area',
+                        text:'Text Area3',
+                        disabled: true,
                         data:{
                         }
                     }
@@ -72,10 +78,33 @@ jQuery(document).ready(function(){
         },
         append: function(node,data){
         },
-        time_click: function(time,data){
-            alert("time click event");
+        time_click: function (time,data) {
+            if (currentEvent !== null) {
+                $sc.removeBar(currentEvent);
+            }
+
+            let key = $sc.addScheduleData({
+                timeline: $(time).closest('.timeline').index(),
+                start: $sc.calcStringTime(data),
+                end: $sc.calcStringTime(addMinutes(data, 60)),
+                text: 'Text',
+            });
+
+            if (key) {
+                currentEvent = key;
+            }
         },
     });
+
+    function addMinutes(time, minsToAdd) {
+        function D (J){ 
+            return (J<10? '0':'') + J;
+        };
+        var piece = time.split(':');
+        var mins = piece[0]*60 + +piece[1] + +minsToAdd;
+
+        return D(mins%(24*60)/60 | 0) + ':' + D(mins%60);  
+    }  
 });
 </script>
 </head>

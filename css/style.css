@@ -67,15 +67,15 @@
 #schedule .timeline{
 	position:relative;
 }
-#schedule .sc_Bar{
+#schedule .sc_Bar {
 	position:absolute;
 	color:#FFF;
 	background:#4f93d6;
 	cursor:pointer;
 	z-index:10;
-	box-shadow: 2px 2px 4px #333;
-	-moz-box-shadow: 2px 2px 4px #333;
-	-webkit-box-shadow: 2px 2px 4px #333;
+}
+#schedule .sc_Bar.disabled_bar {
+	background: #bbb;
 }
 #schedule .ui-draggable-dragging,
 #schedule .ui-resizeable{
